@@ -1,20 +1,17 @@
 version: '3.8'
 services:
-  backend:
-    build: ./backend
-    ports:
-      - "5000:5000"
-    volumes:
-      - backend-data:/app/data
-
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     ports:
       - "3000:80"
     depends_on:
       - backend
-    environment:
-      - VITE_API_URL=http://localhost:5000
 
-volumes:
-  backend-data:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "5000:5000"
