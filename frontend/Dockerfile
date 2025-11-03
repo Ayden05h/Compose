@@ -1,13 +1,28 @@
-# Build stage
-FROM node:18-alpine AS build
+# Stage 1: Build React app
+FROM node:20 AS build
+
 WORKDIR /app
-COPY package*.json ./
+
+# Install build tools and git
+RUN apt-get update && apt-get install -y git python3 make g++ 
+
+# Copy package files first (leverage Docker cache)
+COPY frontend/package*.json ./
+
+# Install dependencies
 RUN npm install
-COPY . .
+
+# Copy source code
+COPY frontend/ ./
+
+# Build the React app
 RUN npm run build
 
-# Serve stage
+# Stage 2: Serve with Nginx
 FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+
+# Copy built app from previous stage
+COPY --from=build /app/build /usr/share/nginx/html
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
